@@ -1,56 +1,115 @@
+// Key for localStorage
 const STORAGE_KEY = 'feedback-form-state';
-const formData = { email: '', message: '' };
-const form = document.querySelector('.feedback-form');
-const emailInput = form.querySelector('input[name="email"]');
-const messageTextarea = form.querySelector('textarea[name="message"]');
 
+// Form data object
+let formData = { email: '', message: '' };
+
+// Get form element
+const form = document.querySelector('.feedback-form');
+
+// Load data on page load
 document.addEventListener('DOMContentLoaded', loadFormData);
+
+// Listen for form changes
 form.addEventListener('input', onFormInput);
+
+// Listen for form submission
 form.addEventListener('submit', onFormSubmit);
 
-// function upload from localStorage
+// Load data from localStorage
 function loadFormData() {
   try {
     const savedData = localStorage.getItem(STORAGE_KEY);
+    console.log('Loading from localStorage:', savedData);
+
     if (savedData) {
       const parsedData = JSON.parse(savedData);
 
-      // update object formData
+      // Update formData with protection from undefined
       formData.email = parsedData.email || '';
       formData.message = parsedData.message || '';
 
-      emailInput.value = formData.email;
-      messageTextarea.value = formData.message;
+      // Fill form fields
+      form.elements.email.value = formData.email;
+      form.elements.message.value = formData.message;
+
+      console.log('FormData after loading:', formData);
+    } else {
+      console.log('No data in localStorage');
     }
   } catch (error) {
-    console.error('Помилка завантаження даних з localStorage:', error);
+    console.error('Error loading data from localStorage:', error);
   }
 }
 
+// Handle form input
 function onFormInput(event) {
-  const { name, value } = event.target;
+  console.log(
+    'Input event on:',
+    event.target.name,
+    '| Value:',
+    event.target.value
+  );
 
-  // Update object
-  formData[name] = value.trim();
+  // Update formData with current form values
+  formData.email = form.elements.email.value;
+  formData.message = form.elements.message.value;
 
-  // save in localStorage
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(formData));
+  console.log('Updated formData:', formData);
+
+  // Create object for localStorage with trimmed spaces
+  const dataToSave = {
+    email: formData.email.trim(),
+    message: formData.message.trim(),
+  };
+
+  console.log('Data to save:', dataToSave);
+
+  // Save to localStorage
+  localStorage.setItem(STORAGE_KEY, JSON.stringify(dataToSave));
+
+  console.log('Saved to localStorage');
+  console.log(
+    'Current localStorage content:',
+    localStorage.getItem(STORAGE_KEY)
+  );
 }
 
+// Handle form submission
 function onFormSubmit(event) {
   event.preventDefault();
+  console.log('Form submission attempt...');
 
-  // Check field
+  // Update formData with current values (trimmed)
+  formData.email = form.elements.email.value.trim();
+  formData.message = form.elements.message.value.trim();
+
+  console.log('FormData for submission:', formData);
+
+  // Check if both fields are filled
   if (!formData.email || !formData.message) {
+    console.log('Not all fields are filled!');
+    console.log('Email:', formData.email ? 'filled' : 'empty');
+    console.log('Message:', formData.message ? 'filled' : 'empty');
     alert('Fill please all fields');
     return;
   }
 
-  console.log('Form data:', formData);
+  console.log('All fields filled! Submitting form...');
 
-  // Clear localStorage, formData and form
+  // Output final form data to console
+  console.log(formData);
+
+  // Clear localStorage
   localStorage.removeItem(STORAGE_KEY);
+  console.log('localStorage cleared');
+
+  // Clear formData object
   formData.email = '';
   formData.message = '';
+  console.log('FormData cleared:', formData);
+
+  // Reset form
   form.reset();
+  console.log('Form reset');
 }
